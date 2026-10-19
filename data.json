@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "title": "Intro to Data Structures",
+        "text": "Covers arrays, linked lists, stacks, queues, hash tables, and trees."
+    },
+    {
+        "id": 2,
+        "title": "Operating Systems",
+        "text": "Processes, threads, memory management, and file systems in C."
+    }
+]

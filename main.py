@@ -15,6 +15,26 @@ def tokenize(text):
     return text.lower().split()
 
 
-text = tokenize("Data Structures: arrays, linked-lists & C.")
+# print(tokenize("Data Structures: arrays, linked-lists & C."))
 
-print(text)
+# return a dict mapping each word to a list of Ids:
+def build_index(documents):
+    index = {}
+    for document in documents:
+        tokens = tokenize(document["text"])
+        for token in tokens:
+            if token not in index:
+                index[token] = []
+                index[token].append(document["id"])
+
+            if index[token][-1] != document["id"]: index[token].append(document["id"])
+
+    return index
+
+
+data_set = load_document("./data.json")
+index = build_index(data_set)
+print(index)
+
+
+

@@ -33,11 +33,15 @@ def build_index(documents):
 
 def search_query(query, index):
     tokens = tokenize(query)
-    if len(tokens) == 0: return []
+    if len(tokens) == 0: 
+        return []
 
     result = index.get(tokens[0], [])
+
     for token in tokens[1:]:
         result = intersect(result, index.get(token, []))
+        if not result:
+            return result
 
     return result
 
@@ -62,9 +66,18 @@ def intersect(list_a, list_b):
 data_set = load_document("./data.json")
 index = build_index(data_set)
 # print(index)
-word_search = "software! and* "
+# word_search = "software! and* "
 
-print(search_query(word_search, index))
+# print(search_query(word_search, index))
+while True: 
+    word_search = input("Enter query: ")
+    if word_search.strip().lower() == "q":
+        break
+
+    print(search_query(word_search, index))
+    
+
+
 
 
 

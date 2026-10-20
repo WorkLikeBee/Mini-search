@@ -31,10 +31,34 @@ def build_index(documents):
 
     return index
 
+def search_query(query, index):
+    token_searching = tokenize(query)[0]
+    return index.get(token_searching, [])
+
+
+def intersect(list_a, list_b):
+    i = 0
+    j = 0
+    match_list = []
+    while i < len(list_a) and j < len(list_b):
+        if list_a[i] < list_b[j]:
+            i+=1
+        elif list_a[i] > list_b[j]:
+            j+=1
+        else:
+            match_list.append(list_a[i])
+            i += 1
+            j += 1
+
+    return match_list
+
 
 data_set = load_document("./data.json")
 index = build_index(data_set)
-print(index)
+# print(index)
+word_search = "development"
+
+print(word_search + " ->", search_query(word_search, index))
 
 
 

@@ -8,5 +8,45 @@
         "id": 2,
         "title": "Operating Systems",
         "text": "Processes, threads, memory management, and file systems in C."
+    },
+    {
+        "id": 3,
+        "title": "Database Systems",
+        "text": "Relational databases, SQL, normalization, and transactions."
+    },
+    {
+        "id": 4,
+        "title": "Computer Networks",
+        "text": "TCP/IP, routing, switching, and network protocols."
+    },
+    {
+        "id": 5,
+        "title": "Software Engineering",
+        "text": "Software development life cycle, design patterns, and testing."
+    },
+    {
+        "id": 6,
+        "title": "Machine Learning",
+        "text": "Supervised and unsupervised learning, neural networks, and model evaluation."
+    },
+    {
+        "id": 7,
+        "title": "Artificial Intelligence",
+        "text": "Search algorithms, knowledge representation, and reasoning."
+    },
+    {
+        "id": 8,
+        "title": "Web Development",
+        "text": "HTML, CSS, JavaScript, front-end frameworks, and back-end development."
+    },
+    {
+        "id": 9,
+        "title": "Mobile App Development",
+        "text": "iOS and Android app development using native and cross-platform tools."
+    },
+    {
+        "id": 10,
+        "title": "Cybersecurity",
+        "text": "Network security, cryptography, ethical hacking, and security policies."
     }
 ]

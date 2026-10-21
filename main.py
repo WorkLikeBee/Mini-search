@@ -63,28 +63,29 @@ def intersect(list_a, list_b):
     return match_list
 
 
-data_set = load_document("./data.json")
-index = build_index(data_set)
-id_to_title = {}
-for data in data_set:
-    id_to_title[data["id"]] = data["title"]
+if __name__ == "__main__":
+    data_set = load_document("./data.json")
+    index = build_index(data_set)
+    id_to_title = {}
+    for data in data_set:
+        id_to_title[data["id"]] = data["title"]
 
-# print(index)
-# word_search = "software! and* "
+    # print(index)
+    # word_search = "software! and* "
 
-# print(search_query(word_search, index))
-while True: 
-    word_search = input("Enter query: ")
-    if word_search.strip().lower() == "q":
-        break
+    # print(search_query(word_search, index))
+    while True: 
+        word_search = input("Enter query: ")
+        if word_search.strip().lower() == "q":
+            break
 
-    result = search_query(word_search, index)
-    if not result:
-        print("Result not found")
+        result = search_query(word_search, index)
+        if not result:
+            print("Result not found")
 
-    else:
-        for doc_id in result:
-            print(f"[{doc_id}] {id_to_title[doc_id]}")
+        else:
+            for doc_id in result:
+                print(f"[{doc_id}] {id_to_title[doc_id]}")
 
 
 

@@ -62,6 +62,23 @@ def intersect(list_a, list_b):
 
     return match_list
 
+def rank_result():
+    pass
+
+def build_term_counts(documents):
+    id_to_counts = {}
+    for doc in documents:
+        counts_dic = {}
+        id_to_counts[doc["id"]] = counts_dic
+        tokens = tokenize(doc["text"])
+        for token in tokens:
+            if token not in counts_dic:
+                counts_dic[token] = 1
+            else:
+                counts_dic[token] += 1
+
+    return id_to_counts
+
 
 if __name__ == "__main__":
     data_set = load_document("./data.json")

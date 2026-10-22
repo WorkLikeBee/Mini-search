@@ -1,4 +1,4 @@
-from main import tokenize, build_index, search_query, intersect
+from main import tokenize, build_index, search_query, intersect, build_term_counts
 
 def test_tokenize_lower_words():
     text = "Hello World"
@@ -69,3 +69,10 @@ def test_search_single_word():
     result = search_query("data", index)
     assert result == [1,2]
 
+def test_build_term_count():
+    result = build_term_counts(SAMPLE_DOCS) 
+    assert result == {
+    1: {"data": 2, "structures": 1, "and": 1, "algorithms": 1},
+    2: {"data": 1, "and": 1, "memory": 1},
+    3: {"memory": 1, "management": 1},
+}

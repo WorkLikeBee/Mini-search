@@ -1,4 +1,5 @@
-from main import tokenize, build_index, search_query, intersect, build_term_counts
+from main import tokenize, build_index, search_query, intersect, build_term_counts, compute_idf, rank_results
+import math
 
 def test_tokenize_lower_words():
     text = "Hello World"
@@ -76,3 +77,22 @@ def test_build_term_count():
     2: {"data": 1, "and": 1, "memory": 1},
     3: {"memory": 1, "management": 1},
 }
+
+def test_compute_idf_with_word():
+    index = build_index(SAMPLE_DOCS)
+    result = compute_idf("management", index, 3)
+    assert result == math.log(3/1)
+
+def test_compute_idf_no_word():
+    index = build_index(SAMPLE_DOCS)
+    result = compute_idf(" ", index, 3)
+    assert result == 0
+
+def test_rank_result_by_frequency():
+    index = build_index(SAMPLE_DOCS)
+    matches = search_query("data", index)
+    total_docs = len(SAMPLE_DOCS)
+    term_counts = build_term_counts(SAMPLE_DOCS)
+
+    result = rank_results(matches, "data", term_counts, index, total_docs)
+    assert result == [1, 2]

@@ -1,5 +1,6 @@
 import json
 import string
+import math
 
 def load_document(path):
     with open (path, "r") as file:
@@ -62,8 +63,25 @@ def intersect(list_a, list_b):
 
     return match_list
 
-def rank_result():
-    pass
+def compute_idf(word, index, total_docs):
+    df = len(index.get(word, []))
+    n = total_docs
+    if df == 0:
+        return 0
+
+    return math.log(n/df)
+
+def rank_results(matches, query, term_counts, index, total_docs):
+    tokens = tokenize(query)
+    scores = {}
+    for doc_id in matches:
+        score = 0 
+        for word in tokens:
+            score += term_counts[doc_id][word] * compute_idf(word, index, total_docs)
+
+        scores[doc_id] = score
+
+    return sorted(matches, key=lambda doc_id: scores[doc_id], reverse=True)
 
 def build_term_counts(documents):
     id_to_counts = {}

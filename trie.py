@@ -12,9 +12,3 @@ class Trie:
             current = current.children[letter]
 
         current.is_end_of_word = True 
-
-
-
-t = Trie()
-t.insert("data")
-print(t.root.children)

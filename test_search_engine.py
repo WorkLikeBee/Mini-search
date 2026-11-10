@@ -1,4 +1,6 @@
-from main import tokenize, build_index, search_query, intersect, build_term_counts, compute_idf, rank_results
+from tokenizer import tokenize
+from index import build_index, search_query, intersect
+from ranking import build_term_counts, compute_idf, rank_results
 import math
 
 def test_tokenize_lower_words():

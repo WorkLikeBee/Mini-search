@@ -1,107 +1,19 @@
 import json
-import string
-import math
+from index import build_index, search_query
+from ranking import build_term_counts, rank_results
 
 def load_document(path):
     with open (path, "r") as file:
         data_set = json.load(file)
         return data_set
 
-def tokenize(text):
-    #Reduce punctuation
-    for char in string.punctuation:
-        if char in text:
-            text = text.replace(char, " ")
-
-    return text.lower().split()
-
-
-# print(tokenize("Data Structures: arrays, linked-lists & C."))
-
-# return a dict mapping each word to a list of Ids:
-def build_index(documents):
-    index = {}
-    for document in documents:
-        tokens = tokenize(document["text"])
-        for token in tokens:
-            if token not in index:
-                index[token] = []
-                index[token].append(document["id"])
-
-            if index[token][-1] != document["id"]: index[token].append(document["id"])
-
-    return index
-
-def search_query(query, index):
-    tokens = tokenize(query)
-    if len(tokens) == 0: 
-        return []
-
-    result = index.get(tokens[0], [])
-
-    for token in tokens[1:]:
-        result = intersect(result, index.get(token, []))
-        if not result:
-            return result
-
-    return result
-
-
-def intersect(list_a, list_b):
-    i = 0
-    j = 0
-    match_list = []
-    while i < len(list_a) and j < len(list_b):
-        if list_a[i] < list_b[j]:
-            i+=1
-        elif list_a[i] > list_b[j]:
-            j+=1
-        else:
-            match_list.append(list_a[i])
-            i += 1
-            j += 1
-
-    return match_list
-
-def compute_idf(word, index, total_docs):
-    df = len(index.get(word, []))
-    n = total_docs
-    if df == 0:
-        return 0
-
-    return math.log(n/df)
-
-def rank_results(matches, query, term_counts, index, total_docs):
-    tokens = tokenize(query)
-    scores = {}
-    for doc_id in matches:
-        score = 0 
-        for word in tokens:
-            score += term_counts[doc_id][word] * compute_idf(word, index, total_docs)
-
-        scores[doc_id] = score
-
-    return sorted(matches, key=lambda doc_id: scores[doc_id], reverse=True)
-
-def build_term_counts(documents):
-    id_to_counts = {}
-    for doc in documents:
-        counts_dic = {}
-        id_to_counts[doc["id"]] = counts_dic
-        tokens = tokenize(doc["text"])
-        for token in tokens:
-            if token not in counts_dic:
-                counts_dic[token] = 1
-            else:
-                counts_dic[token] += 1
-
-    return id_to_counts
-
 
 if __name__ == "__main__":
     data_set = load_document("./data.json")
     index = build_index(data_set)
+    term_counts = build_term_counts(data_set)
     id_to_title = {}
+    total_docs = len(data_set)
     for data in data_set:
         id_to_title[data["id"]] = data["title"]
 
@@ -115,6 +27,7 @@ if __name__ == "__main__":
             break
 
         result = search_query(word_search, index)
+        result = rank_results(result, word_search, term_counts, index, total_docs)
         if not result:
             print("Result not found")
 

@@ -1,10 +1,10 @@
 # Mini-search
 
-Full-text search engine built from scratch with Python
+A full-text search engine built from scratch in Python, with TF-IDF ranking and trie-based autocomplete.
 
 ## Background
 
-I found it interesting how we can ask Google to search for something and they will give the best match option on top.
+I found it interesting that when we ask Google to search for something, it shows the best match first. I built this project to learn how that works.
 
 ## Demo
 
@@ -22,14 +22,16 @@ Suggestions:  ['software']
 Enter query: q
 ```
 
-A full-text search engine will build an word-to-id map based on the dataset. Then it will use the input from the user to search the expected document(s) through the index, and then rank the result using TF-IDF method. If the user is unsure about the word-spell, the user can type "*" at the end so that the engine will provide suggestions if found.
+Document 9 ranks first because it mentions "development" the most. A plain search like `softw` only matches whole words, while adding `*` asks for suggestions that start with that prefix.
+
+A full-text search engine builds a word-to-ID map from the dataset. It then uses the user's input to find the matching document(s) through the index, and ranks the results using the TF-IDF method. If the user is unsure of the spelling, they can type `*` at the end, and the engine will suggest words that start with what they typed.
 
 ## Features
 
 - Multi-word search
-- Ranking result using TF-IDF method
+- Ranked results using TF-IDF
 - Prefix autocomplete
-- case-insensitive searching and punctuation handling
+- Case-insensitive search and punctuation handling
 
 ## How it works
 
@@ -38,17 +40,16 @@ query → tokenize → inverted index lookup → intersect → rank (TF-IDF) →
 ```
 
 1. **Tokenize:** turn the query into tokens (a list of words)
-2. **Inverted index:** build word-to-id map
+2. **Inverted index:** build a word-to-ID map
 3. **Intersect:** find the results that match all the tokens
-4. **Rank:** ranking the results using TF - IDF method
+4. **Rank:** rank the results using the TF-IDF method
 
-Autocomplete: the trie is a data structure built from nodes. Each node will have a children map essentially, and a boolean value to determine whether it is the end of the branch. The trie will have some basic functions to insert branches and autocomplete using prefix to give instruction.
-The autocomplete function will look for the branches that have the prefix and then walk till the end of those branches, then return the suggested words in a list. 
+**Autocomplete:** the trie is a data structure built from nodes. Each node has a map of its children and a boolean that marks whether the path to it spells a complete word. A node can be the end of a word and still have children: "data" is a complete word, but it continues into "database" and "dataset." The trie has two main functions: insert a word, and autocomplete a prefix to give suggestions.
+The autocomplete function walks down the path that matches the prefix, then explores every path below it, collects each complete word it finds, and returns the suggestions in a list.
 
-Design decisions
-<!-- What you chose, why, and the time complexity where you can. -->
+## Design decisions
 
-Duplicate prevention in O(1). Documents are indexed in increasing ID order, so if a word's posting list already contains the current document, it must be the last entry. Checking only the last element avoids an O(n) membership scan.
+**Duplicate prevention in O(1).** Documents are indexed in increasing ID order, so if a word's posting list already contains the current document, it must be the last entry. Checking only the last element avoids an O(n) membership scan.
 
 **Two-pointer intersection.** Each word's list of document IDs is already sorted, because documents are indexed in ID order. Two pointers walk both lists at once, always advancing the pointer at the smaller ID, and record a match when the IDs are equal. This runs in O(n + m) time, where n and m are the lengths of the two lists, and needs no extra data structures like sets.
 
@@ -95,7 +96,11 @@ test_search_engine.py   # Tests for tokenizer, search, and ranking
 test_trie.py            # Tests for the trie and autocomplete
 ```
 
-Roadmap
- TODO: web API and search page
- TODO: real data (e.g. Hacker News or Wikipedia)
- TODO: rewrite the index core in C and benchmark it
+## Roadmap
+
+- [ ] Make document titles searchable (currently only the text is indexed)
+- [ ] Autocomplete the last word of a multi-word query, e.g. `software eng*`
+- [ ] OR-style search, so documents matching most (not all) query words still appear, ranked lower
+- [ ] Real data from an API such as Hacker News or Wikipedia
+- [ ] Web API and search page
+- [ ] Rewrite the index core in C and benchmark it against Python

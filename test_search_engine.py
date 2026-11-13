@@ -98,3 +98,18 @@ def test_rank_result_by_frequency():
 
     result = rank_results(matches, "data", term_counts, index, total_docs)
     assert result == [1, 2]
+
+def test_rank_results_higher_frequency_first():
+    docs = [
+        {"id": 1, "title": "A", "text": "memory"},
+        {"id": 2, "title": "B", "text": "memory memory memory"},
+        {"id": 3, "title": "C", "text": "networks"},
+    ]
+    index = build_index(docs)
+    term_counts = build_term_counts(docs)
+    matches = search_query("memory", index)     
+
+    result = rank_results(matches, "memory", term_counts, index, len(docs))
+
+    assert result == [2, 1]
+

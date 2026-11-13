@@ -12,10 +12,15 @@ def compute_idf(word, index, total_docs):
 def rank_results(matches, query, term_counts, index, total_docs):
     tokens = tokenize(query)
     scores = {}
+    idf = {}
+
+    for word in tokens:
+        idf[word] = compute_idf(word, index, total_docs)
+
     for doc_id in matches:
         score = 0 
         for word in tokens:
-            score += term_counts[doc_id][word] * compute_idf(word, index, total_docs)
+            score += term_counts[doc_id][word] * idf[word]
 
         scores[doc_id] = score
 

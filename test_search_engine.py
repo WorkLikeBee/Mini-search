@@ -113,3 +113,17 @@ def test_rank_results_higher_frequency_first():
 
     assert result == [2, 1]
 
+def test_rank_results_tie_keeps_id_order():
+    index = build_index(SAMPLE_DOCS)
+    term_counts = build_term_counts(SAMPLE_DOCS)
+    matches = search_query("memory", index)
+
+    result = rank_results(matches, "memory", term_counts, index, len(SAMPLE_DOCS))
+    assert result == [2, 3]
+
+def test_rank_results_empty_matches():
+    index = build_index(SAMPLE_DOCS)
+    term_counts = build_term_counts(SAMPLE_DOCS)
+    result = rank_results([], "memory", term_counts, index, len(SAMPLE_DOCS))
+
+    assert result == []

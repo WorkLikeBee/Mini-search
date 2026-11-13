@@ -72,12 +72,18 @@ def test_search_single_word():
     result = search_query("data", index)
     assert result == [1,2]
 
+def test_search_title_only():
+    index = build_index(SAMPLE_DOCS)
+    result = search_query("one", index)
+
+    assert result == [1]
+
 def test_build_term_count():
     result = build_term_counts(SAMPLE_DOCS) 
     assert result == {
-    1: {"data": 2, "structures": 1, "and": 1, "algorithms": 1},
-    2: {"data": 1, "and": 1, "memory": 1},
-    3: {"memory": 1, "management": 1},
+    1: {"doc": 1, "one": 1,"data": 2, "structures": 1, "and": 1, "algorithms": 1},
+    2: {"doc": 1, "two": 1,"data": 1, "and": 1, "memory": 1},
+    3: {"doc": 1, "three": 1, "memory": 1, "management": 1},
 }
 
 def test_compute_idf_with_word():

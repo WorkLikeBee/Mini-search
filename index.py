@@ -1,10 +1,10 @@
 # return a dict mapping each word to a list of Ids:
-from tokenizer import tokenize
+from tokenizer import tokenize, searchable_text
 
 def build_index(documents):
     index = {}
     for document in documents:
-        tokens = tokenize(document["text"])
+        tokens = tokenize(searchable_text(document))
         for token in tokens:
             if token not in index:
                 index[token] = []

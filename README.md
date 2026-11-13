@@ -13,12 +13,16 @@ Enter query: dev*
 Suggestions:  ['development']
 Enter query: development
 [9] Mobile App Development
-[5] Software Engineering
 [8] Web Development
+[5] Software Engineering
 Enter query: softw
 Result not found
 Enter query: soft*
 Suggestions:  ['software']
+Enter query: software
+[5] Software Engineering
+Enter query: software engineering
+[5] Software Engineering
 Enter query: q
 ```
 
@@ -98,7 +102,7 @@ test_trie.py            # Tests for the trie and autocomplete
 
 ## Roadmap
 
-- [ ] Make document titles searchable (currently only the text is indexed)
+- [X] Make document titles searchable (currently only the text is indexed)
 - [ ] Autocomplete the last word of a multi-word query, e.g. `software eng*`
 - [ ] OR-style search, so documents matching most (not all) query words still appear, ranked lower
 - [ ] Real data from an API such as Hacker News or Wikipedia

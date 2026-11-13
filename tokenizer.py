@@ -7,3 +7,6 @@ def tokenize(text):
             text = text.replace(char, " ")
 
     return text.lower().split()
+
+def searchable_text(document):
+    return (document["title"] + " " + document["text"])

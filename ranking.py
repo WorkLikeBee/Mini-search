@@ -1,5 +1,5 @@
 import math
-from tokenizer import tokenize
+from tokenizer import tokenize,searchable_text
 
 def compute_idf(word, index, total_docs):
     df = len(index.get(word, []))
@@ -28,10 +28,10 @@ def rank_results(matches, query, term_counts, index, total_docs):
 
 def build_term_counts(documents):
     id_to_counts = {}
-    for doc in documents:
+    for document in documents:
         counts_dic = {}
-        id_to_counts[doc["id"]] = counts_dic
-        tokens = tokenize(doc["text"])
+        id_to_counts[document["id"]] = counts_dic
+        tokens = tokenize(searchable_text(document))
         for token in tokens:
             if token not in counts_dic:
                 counts_dic[token] = 1

@@ -102,7 +102,7 @@ test_trie.py            # Tests for the trie and autocomplete
 
 ## Roadmap
 
-- [X] Make document titles searchable (currently only the text is indexed)
+- [X] Make document titles searchable
 - [ ] Autocomplete the last word of a multi-word query, e.g. `software eng*`
 - [ ] OR-style search, so documents matching most (not all) query words still appear, ranked lower
 - [ ] Real data from an API such as Hacker News or Wikipedia

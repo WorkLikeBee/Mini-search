@@ -1,7 +1,7 @@
 import json
 from index import build_index, search_query
 from ranking import build_term_counts, rank_results
-from trie import Trie
+from trie import Trie, complete_query
 
 def load_document(path):
     with open(path, "r", encoding="utf-8") as file:
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
         if (word_search.endswith("*")):
             word_search = word_search[:-1]
-            suggestions = trie.autocomplete(word_search)
+            suggestions = complete_query(word_search, trie)
             if (not suggestions):
                 print("No suggestions")
             else:

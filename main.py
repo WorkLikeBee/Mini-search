@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
         if (word_search.endswith("*")):
             word_search = word_search[:-1]
-            suggestions = complete_query(word_search, trie)
+            suggestions = complete_query(word_search, trie, index)
             if (not suggestions):
                 print("No suggestions")
             else:

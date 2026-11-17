@@ -1,5 +1,6 @@
 from trie_node import TrieNode
 from tokenizer import tokenize
+from index import search_query
 
 class Trie:
     def __init__(self):
@@ -36,17 +37,19 @@ class Trie:
         for letter, child in node.children.items():
             self._collect(child, prefix + letter, results)
 
-def complete_query(query, trie):
-        """Autocomplete the last word of a query, keeping the earlier words."""
-        words = tokenize(query)
-        if not words:
-            return []
+def complete_query(query, trie, index):
+    """Autocomplete the last word of a query, keeping the earlier words."""
+    words = tokenize(query)
+    if not words:
+        return []
 
-        kept = words[:-1]
-        last = words[-1]
+    kept = words[:-1]
+    last = words[-1]
 
-        suggestions = []
-        for word in trie.autocomplete(last):
-            suggestions.append(" ".join(kept + [word]))
+    suggestions = []
+    for word in trie.autocomplete(last):
+        candidate = " ".join(kept + [word])
+        if search_query(candidate, index):
+            suggestions.append(candidate)
 
-        return suggestions
+    return suggestions

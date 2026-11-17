@@ -173,3 +173,11 @@ def test_rank_results_empty_matches():
     result = rank_results([], "memory", term_counts, index, len(SAMPLE_DOCS))
 
     assert result == []
+
+def test_rank_result_matches_beat_frequency():
+    index = build_index(SAMPLE_DOCS)
+    term_counts = build_term_counts(SAMPLE_DOCS)
+    matches = search_query_any("data memory", index)
+
+    result = rank_results(matches, "data memory", term_counts, index, len(SAMPLE_DOCS))
+    assert result == [2,1,3]

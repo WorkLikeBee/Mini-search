@@ -1,5 +1,5 @@
 import json
-from index import build_index, search_query
+from index import build_index, search_query_any
 from ranking import build_term_counts, rank_results
 from trie import Trie, complete_query
 
@@ -30,7 +30,7 @@ def main():
             print("Suggestions: ", suggestions if suggestions else "No suggestions")
             continue
 
-        matches = search_query(query, index)
+        matches = search_query_any(query, index)
         results = rank_results(matches, query, term_counts, index, total_docs)
         if not results:
             print("Result not found")

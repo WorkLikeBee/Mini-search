@@ -3,44 +3,42 @@ from index import build_index, search_query
 from ranking import build_term_counts, rank_results
 from trie import Trie, complete_query
 
+
 def load_document(path):
     with open(path, "r", encoding="utf-8") as file:
-        data_set = json.load(file)
-        return data_set
+        return json.load(file)
 
-if __name__ == "__main__":
-    data_set = load_document("./data.json")
-    index = build_index(data_set)
-    term_counts = build_term_counts(data_set)
-    id_to_title = {}
-    total_docs = len(data_set)
+
+def main():
+    documents = load_document("./data.json")
+    index = build_index(documents)
+    term_counts = build_term_counts(documents)
+    id_to_title = {doc["id"]: doc["title"] for doc in documents}
+    total_docs = len(documents)
 
     trie = Trie()
     for token in index:
         trie.insert(token)
 
-    for data in data_set:
-        id_to_title[data["id"]] = data["title"]
-
     while True:
-        word_search = input("Enter query: ").strip()
-        if word_search.lower() == "q":
+        query = input("Enter query: ").strip()
+        if query.lower() == "q":
             break
 
-        if (word_search.endswith("*")):
-            word_search = word_search[:-1]
-            suggestions = complete_query(word_search, trie, index)
-            if (not suggestions):
-                print("No suggestions")
-            else:
-                print("Suggestions: ", suggestions)
+        if query.endswith("*"):
+            suggestions = complete_query(query[:-1], trie, index)
+            print("Suggestions: ", suggestions if suggestions else "No suggestions")
+            continue
 
-        else:
-            result = search_query(word_search, index)
-            result = rank_results(result, word_search, term_counts, index, total_docs)
-            if not result:
-                print("Result not found")
+        matches = search_query(query, index)
+        results = rank_results(matches, query, term_counts, index, total_docs)
+        if not results:
+            print("Result not found")
+            continue
 
-            else:
-                for doc_id in result:
-                    print(f"[{doc_id}] {id_to_title[doc_id]}")
+        for doc_id in results:
+            print(f"[{doc_id}] {id_to_title[doc_id]}")
+
+
+if __name__ == "__main__":
+    main()

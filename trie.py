@@ -46,10 +46,5 @@ def complete_query(query, trie, index):
     kept = words[:-1]
     last = words[-1]
 
-    suggestions = []
-    for word in trie.autocomplete(last):
-        candidate = " ".join(kept + [word])
-        if search_query(candidate, index):
-            suggestions.append(candidate)
-
-    return suggestions
+    candidates = (" ".join(kept + [word]) for word in trie.autocomplete(last))
+    return [c for c in candidates if search_query(c, index)]

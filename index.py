@@ -1,18 +1,18 @@
-# return a dict mapping each word to a list of Ids:
 from tokenizer import tokenize, searchable_text
 
 def build_index(documents):
+    """Map each word to a sorted list of the IDs of documents containing it."""
     index = {}
     for document in documents:
-        tokens = tokenize(searchable_text(document))
-        for token in tokens:
-            if token not in index:
-                index[token] = []
-                index[token].append(document["id"])
-
-            if index[token][-1] != document["id"]: index[token].append(document["id"])
+        doc_id = document["id"]
+        for token in tokenize(searchable_text(document)):
+            postings = index.setdefault(token, [])
+            # Documents arrive in increasing ID order, so a duplicate can only be last.
+            if not postings or postings[-1] != doc_id:
+                postings.append(doc_id)
 
     return index
+
 
 def search_query(query, index):
     tokens = tokenize(query)
@@ -35,9 +35,9 @@ def intersect(list_a, list_b):
     match_list = []
     while i < len(list_a) and j < len(list_b):
         if list_a[i] < list_b[j]:
-            i+=1
+            i += 1
         elif list_a[i] > list_b[j]:
-            j+=1
+            j += 1
         else:
             match_list.append(list_a[i])
             i += 1

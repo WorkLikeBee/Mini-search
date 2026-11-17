@@ -12,7 +12,7 @@ class Trie:
                 current.children[letter] = TrieNode()
             current = current.children[letter]
 
-        current.is_end_of_word = True 
+        current.is_end_of_word = True
 
     def autocomplete(self, prefix):
         current = self.root

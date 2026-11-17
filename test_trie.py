@@ -49,3 +49,10 @@ def test_missing_prefix():
     t.insert("dataset")
     t.insert("memory")
     assert (t.autocomplete("xyz") == [])
+
+def test_complete_query_multiple_words():
+    t = Trie()
+    t.insert("data")
+    t.insert("database")
+    t.insert("dataset")
+    t.insert("memory")

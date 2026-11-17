@@ -18,11 +18,11 @@ if __name__ == "__main__":
     trie = Trie()
     for token in index:
         trie.insert(token)
-    
+
     for data in data_set:
         id_to_title[data["id"]] = data["title"]
 
-    while True: 
+    while True:
         word_search = input("Enter query: ").strip()
         if word_search.lower() == "q":
             break
@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 print("No suggestions")
             else:
                 print("Suggestions: ", suggestions)
-        
+
         else:
             result = search_query(word_search, index)
             result = rank_results(result, word_search, term_counts, index, total_docs)

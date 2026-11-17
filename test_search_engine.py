@@ -79,7 +79,7 @@ def test_search_title_only():
     assert result == [1]
 
 def test_build_term_count():
-    result = build_term_counts(SAMPLE_DOCS) 
+    result = build_term_counts(SAMPLE_DOCS)
     assert result == {
     1: {"doc": 1, "one": 1,"data": 2, "structures": 1, "and": 1, "algorithms": 1},
     2: {"doc": 1, "two": 1,"data": 1, "and": 1, "memory": 1},
@@ -113,7 +113,7 @@ def test_rank_results_higher_frequency_first():
     ]
     index = build_index(docs)
     term_counts = build_term_counts(docs)
-    matches = search_query("memory", index)     
+    matches = search_query("memory", index)
 
     result = rank_results(matches, "memory", term_counts, index, len(docs))
 

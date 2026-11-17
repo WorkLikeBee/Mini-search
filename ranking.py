@@ -18,7 +18,7 @@ def rank_results(matches, query, term_counts, index, total_docs):
         idf[word] = compute_idf(word, index, total_docs)
 
     for doc_id in matches:
-        score = 0 
+        score = 0
         for word in tokens:
             score += term_counts[doc_id][word] * idf[word]
 

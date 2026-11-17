@@ -16,7 +16,7 @@ def build_index(documents):
 
 def search_query(query, index):
     tokens = tokenize(query)
-    if len(tokens) == 0: 
+    if len(tokens) == 0:
         return []
 
     result = index.get(tokens[0], [])

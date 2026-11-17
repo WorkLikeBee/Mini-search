@@ -13,6 +13,17 @@ def build_index(documents):
 
     return index
 
+def search_query_any(query, index):
+    tokens = tokenize(query)
+    if len(tokens) == 0:
+        return []
+
+    result = index.get(tokens[0], [])
+
+    for token in tokens[1:]:
+        result = union(result, index.get(token, []))
+
+    return result
 
 def search_query(query, index):
     tokens = tokenize(query)

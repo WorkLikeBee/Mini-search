@@ -1,5 +1,5 @@
 from tokenizer import tokenize
-from index import build_index, search_query, intersect, union
+from index import build_index, search_query, intersect, union, search_query_any
 from ranking import build_term_counts, compute_idf, rank_results
 import math
 
@@ -93,6 +93,30 @@ def test_search_title_only():
     result = search_query("one", index)
 
     assert result == [1]
+
+def test_search_any_with_one_missing():
+    index = build_index(SAMPLE_DOCS)
+    result = search_query_any("data zzz", index)
+
+    assert result == [1,2]
+
+def test_search_any():
+    index = build_index(SAMPLE_DOCS)
+    result = search_query_any("data management", index)
+
+    assert result == [1,2,3]
+
+def test_search_any_empty_query():
+    index = build_index(SAMPLE_DOCS)
+    result = search_query_any(" ", index)
+
+    assert result == []
+
+def test_search_any_not_found_query():
+    index = build_index(SAMPLE_DOCS)
+    result = search_query_any("zzz yyy", index)
+
+    assert result == []
 
 def test_build_term_count():
     result = build_term_counts(SAMPLE_DOCS)

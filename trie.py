@@ -15,7 +15,7 @@ class Trie:
 
         current.is_end_of_word = True
 
-    def autocomplete(self, prefix):
+    def autocomplete(self, prefix, limit=10):
         current = self.root
         prefix = prefix.lower().strip()
         for letter in prefix:
@@ -23,19 +23,24 @@ class Trie:
                 return [] #no word starts with this prefix
             current = current.children[letter]
         results = []
-        self._collect(current, prefix, results)
-        return sorted(results)
+        self._collect(current, prefix, results, limit)
+
+        return results
 
     #recursive call
-    def _collect(self, node, prefix, results):
+    def _collect(self, node, prefix, results, limit):
         """
         Add every complete word below node to results, using DFS (Depth-first search)
         """
+        if len(results) >= limit:
+            return
         if node.is_end_of_word:
             results.append(prefix)
 
-        for letter, child in node.children.items():
-            self._collect(child, prefix + letter, results)
+        for letter, child in sorted(node.children.items()):
+            self._collect(child, prefix + letter, results, limit)
+            if len(results) >= limit:
+                return
 
 def complete_query(query, trie, index):
     """Autocomplete the last word of a query, keeping the earlier words."""

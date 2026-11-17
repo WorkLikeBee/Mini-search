@@ -43,6 +43,21 @@ def test_auto_complete_empty_prefix():
     t.insert("memory")
     assert (t.autocomplete("") == ["data", "database", "dataset", "memory"])
 
+def test_auto_complete_with_cap_limit():
+    t = Trie()
+    for word in ["abe", "abd", "abc", "ab", "a"]:
+        t.insert(word)
+
+    assert (t.autocomplete("a", limit=3) == ["a","ab","abc"])
+
+def test_auto_complete_reverse_with_cap_limit():
+    t = Trie()
+    for word in ["a", "ab", "abc", "abd", "abe"]:
+        t.insert(word)
+
+    assert (t.autocomplete("a", limit=3) == ["a", "ab", "abc"])
+
+
 def test_missing_prefix():
     t = Trie()
     t.insert("data")

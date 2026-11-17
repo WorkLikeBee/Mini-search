@@ -1,5 +1,5 @@
 from tokenizer import tokenize
-from index import build_index, search_query, intersect
+from index import build_index, search_query, intersect, union
 from ranking import build_term_counts, compute_idf, rank_results
 import math
 
@@ -34,6 +34,22 @@ def test_intersect_no_common():
     list_b = [2]
     result = intersect(list_a, list_b)
     assert result == []
+
+def test_union_shared_id():
+    list_a = [1,2,3]
+    list_b = [3,4,5]
+    result = union(list_a, list_b)
+    assert result == [1,2,3,4,5]
+
+def test_union_with_empty_list():
+    result = union([], [1,2])
+    assert result == [1,2]
+
+def test_union_check_drop_out_last_item():
+    list_a = [1,5]
+    list_b = [2]
+    result = union(list_a, list_b)
+    assert result == [1,2,5]
 
 def test_intersect_with_empty_list():
     list_a = []

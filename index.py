@@ -44,3 +44,27 @@ def intersect(list_a, list_b):
             j += 1
 
     return match_list
+
+def union(list_a, list_b):
+    i = 0
+    j = 0
+    merged = []
+    while i < len(list_a) and j < len(list_b):
+        if list_a[i] < list_b[j]:
+            merged.append(list_a[i])
+            i += 1
+        elif list_a[i] > list_b[j]:
+            merged.append(list_b[j])
+            j += 1
+        else:
+            merged.append(list_a[i])
+            i += 1
+            j += 1
+
+    for item in list_a[i:]:
+        merged.append(item)
+
+    for item in list_b[j:]:
+        merged.append(item)
+
+    return merged

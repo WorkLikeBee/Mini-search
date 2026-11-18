@@ -2,6 +2,8 @@
 *.pyc
 __pycache__/
 
+raw_sample.json
+
 .pytest_cache/
 
 .DS_Store

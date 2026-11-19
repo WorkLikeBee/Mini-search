@@ -9,7 +9,12 @@ def load_document(path):
         return json.load(f)
 
 def main():
-    documents = load_document("data_stackoverflow.json")
+    try:
+        documents = load_document("data_stackoverflow.json")
+    except FileNotFoundError:
+        print("data_stackoverflow.json not found. Run `python fetch_data.py` first to download questions (uses 10 API requests).")
+        return
+
     index = build_index(documents)
     term_counts = build_term_counts(documents)
     id_to_doc = {doc["id"]: (doc["title"], doc.get("link")) for doc in documents}

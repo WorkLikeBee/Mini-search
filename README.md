@@ -1,6 +1,6 @@
 # Mini-search
 
-A full-text search engine built from scratch in Python, with TF-IDF ranking and trie-based autocomplete, searching about 900 of the most-voted Stack Overflow questions.
+A full-text search engine built from scratch in Python, with BM25 ranking and trie-based autocomplete, searching about 900 of the most-voted Stack Overflow questions.
 
 ## Background
 
@@ -25,13 +25,13 @@ Enter query: q
 
 Typing `*` at the end of a query asks for suggestions, drawn from the real vocabulary of the questions. A normal query returns the 10 most relevant questions, each with a link to the original on Stack Overflow.
 
-A full-text search engine builds a word-to-ID map from the dataset. It then uses the user's input to find the matching document(s) through the index, and ranks the results using the TF-IDF method. If the user is unsure of the spelling, they can type `*` at the end, and the engine will suggest words that start with what they typed.
+A full-text search engine builds a word-to-ID map from the dataset. It then uses the user's input to find the matching document(s) through the index, and ranks the results using the BM25 method. If the user is unsure of the spelling, they can type `*` at the end, and the engine will suggest words that start with what they typed.
 
 ## Features
 
 - Searches real Stack Overflow questions, fetched from the Stack Exchange API
 - Multi-word search: documents matching any query word are returned, with full matches ranked first
-- Ranked results using TF-IDF, showing the top 10 with links
+- Ranked results using BM25, showing the top 10 with links
 - Prefix autocomplete, including the last word of a multi-word query
 - Searches both question titles and text
 - Case-insensitive search and punctuation handling
@@ -47,13 +47,13 @@ Stack Exchange API → page through results → skip duplicates and closed quest
 **Searching** (`main.py`):
 
 ```
-query → tokenize → inverted index lookup → union → rank (matched words, then TF-IDF) → top 10 results
+query → tokenize → inverted index lookup → union → rank (matched words, then BM25) → top 10 results
 ```
 
 1. **Tokenize:** turn the query into tokens (a list of words)
 2. **Inverted index:** build a word-to-ID map covering each document's title and text
 3. **Combine:** find every document that contains at least one query word
-4. **Rank:** sort by how many distinct query words each document contains, then by TF-IDF score, and show the top 10
+4. **Rank:** sort by how many distinct query words each document contains, then by BM25 score, and show the top 10
 
 **Autocomplete:** the trie is a data structure built from nodes. Each node has a map of its children and a boolean that marks whether the path to it spells a complete word. A node can be the end of a word and still have children: "data" is a complete word, but it continues into "database" and "dataset." The trie has two main functions: insert a word, and autocomplete a prefix to give suggestions.
 The autocomplete function walks down the path that matches the prefix, then explores every path below it in alphabetical order, collects each complete word it finds (up to a limit), and returns the suggestions in a list. For a multi-word query, only the last word is completed, and a suggestion is kept only if all of its words appear together in at least one document.
@@ -66,13 +66,15 @@ The autocomplete function walks down the path that matches the prefix, then expl
 
 **Two-pointer intersection and union.** Each word's list of document IDs is already sorted, because documents are indexed in ID order. Two pointers walk both lists at once, always advancing the pointer at the smaller ID. Intersection keeps only IDs found in both lists; union (the merge step from merge sort) keeps every ID once. Both run in O(n + m) time, where n and m are the lengths of the two lists, and need no extra data structures like sets.
 
-**Ranked by matched words, then TF-IDF.** Search returns documents containing any query word. Results are sorted by a two-part key: the number of distinct query words a document contains, then its TF-IDF score. A document matching the whole query always beats one that repeats a single word many times, and TF-IDF breaks ties.
+**Ranked by matched words, then BM25.** Search returns documents containing any query word. Results are sorted by a two-part key: the number of distinct query words a document contains, then its BM25 score. A document matching the whole query always beats one that repeats a single word many times, and BM25 breaks ties.
+
+**BM25 instead of plain TF-IDF.** Plain TF-IDF rewards a word every time it repeats, so long questions that mention a word often outrank short, focused ones. BM25 fixes this in two ways: term frequency saturates (the tenth repeat adds far less than the second), and each document's score is normalized by its length relative to the average (`k1 = 1.5`, `b = 0.75`). Document lengths are computed once from the term counts, so ranking needs no extra pass over the text. The matched-words count stays the first sort key, so BM25 only orders documents that match the same number of query words.
 
 **Rank first, then trim.** All matching documents are ranked before the top 10 are taken. An earlier version trimmed to 10 before ranking, which kept the 10 lowest IDs instead of the 10 best matches.
 
 **Filtering separate from ranking.** `search_query_any` finds candidate documents, and `rank_results` orders them by relevance. Keeping these as separate steps means each one can be tested and changed on its own.
 
-**Term counts in a separate structure.** TF-IDF needs to know how many times each word appears in each document, but the inverted index only stores which documents contain a word. Instead of changing the index (which would have broken the intersection code), word counts live in their own dictionary: document ID → word → count.
+**Term counts in a separate structure.** BM25 needs to know how many times each word appears in each document, but the inverted index only stores which documents contain a word. Instead of changing the index (which would have broken the intersection code), word counts live in their own dictionary: document ID → word → count.
 
 **One shared source of searchable text.** A single `searchable_text` helper combines a document's title and text, and both the index and the term counts use it, so search and ranking can never see different words.
 
@@ -125,7 +127,7 @@ main.py                 # Loads data, builds the index, ranking data, and trie; 
 fetch_data.py           # Fetches questions from the Stack Exchange API, cleans them, and saves them as JSON
 tokenizer.py            # Lowercases text, removes punctuation, splits into words; combines title and text
 index.py                # Builds the inverted index; AND and OR search with two-pointer intersection and union
-ranking.py              # Term counts, IDF, and ranking by matched words then TF-IDF
+ranking.py              # Term counts, document lengths, IDF, and ranking by matched words then BM25
 trie.py                 # Trie with insert, limited prefix autocomplete, and multi-word query completion
 trie_node.py            # A single trie node (children and end-of-word marker)
 test_search_engine.py   # Tests for tokenizer, search, and ranking
@@ -143,7 +145,7 @@ data_stackoverflow.json # Generated by fetch_data.py (not committed)
 
 Problems found by testing on real data:
 
-- [ ] Length normalization (BM25), so long questions don't rank higher just for mentioning more words
+- [x] Length normalization (BM25), so long questions don't rank higher just for mentioning more words
 - [ ] Stemming, so `sort`, `sorted`, and `sorting` match each other
 - [ ] Stop words or IDF-weighted match counts, so common words like "in" don't count as much as rare ones
 - [ ] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off

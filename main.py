@@ -1,6 +1,6 @@
 import json
 from index import build_index, search_query_any
-from ranking import build_term_counts, rank_results
+from ranking import build_term_counts, rank_results, build_doc_lengths
 from trie import Trie, complete_query
 
 
@@ -17,6 +17,8 @@ def main():
 
     index = build_index(documents)
     term_counts = build_term_counts(documents)
+    docs_length = build_doc_lengths(term_counts)
+    average_docs_length = sum(docs_length.values()) / len(docs_length)
     id_to_doc = {doc["id"]: (doc["title"], doc.get("link")) for doc in documents}
     total_docs = len(documents)
 
@@ -35,7 +37,7 @@ def main():
             continue
 
         matches = search_query_any(query, index)
-        results = rank_results(matches, query, term_counts, index, total_docs)
+        results = rank_results(matches, query, term_counts, index, total_docs, docs_length, average_docs_length)
         if not results:
             print("Result not found")
             continue

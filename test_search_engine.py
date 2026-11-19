@@ -1,6 +1,6 @@
 from tokenizer import tokenize
 from index import build_index, search_query, intersect, union, search_query_any
-from ranking import build_term_counts, compute_idf, rank_results
+from ranking import build_term_counts, compute_idf, rank_results, build_doc_lengths
 import math
 
 def test_tokenize_lower_words():
@@ -126,6 +126,16 @@ def test_build_term_count():
     3: {"doc": 1, "three": 1, "memory": 1, "management": 1},
 }
 
+def test_build_doc_lengths():
+    term_counts = build_term_counts(SAMPLE_DOCS)
+    result = build_doc_lengths(term_counts)
+
+    assert result == {
+        1: 7,
+        2: 5,
+        3: 4
+    }
+
 def test_compute_idf_with_word():
     index = build_index(SAMPLE_DOCS)
     result = compute_idf("management", index, 3)
@@ -141,8 +151,10 @@ def test_rank_result_by_frequency():
     matches = search_query("data", index)
     total_docs = len(SAMPLE_DOCS)
     term_counts = build_term_counts(SAMPLE_DOCS)
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
 
-    result = rank_results(matches, "data", term_counts, index, total_docs)
+    result = rank_results(matches, "data", term_counts, index, total_docs, doc_lengths, avg_length)
     assert result == [1, 2]
 
 def test_rank_results_higher_frequency_first():
@@ -154,8 +166,10 @@ def test_rank_results_higher_frequency_first():
     index = build_index(docs)
     term_counts = build_term_counts(docs)
     matches = search_query("memory", index)
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
 
-    result = rank_results(matches, "memory", term_counts, index, len(docs))
+    result = rank_results(matches, "memory", term_counts, index, len(docs), doc_lengths, avg_length)
 
     assert result == [2, 1]
 
@@ -163,14 +177,18 @@ def test_rank_results_tie_keeps_id_order():
     index = build_index(SAMPLE_DOCS)
     term_counts = build_term_counts(SAMPLE_DOCS)
     matches = search_query("memory", index)
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
 
-    result = rank_results(matches, "memory", term_counts, index, len(SAMPLE_DOCS))
-    assert result == [2, 3]
+    result = rank_results(matches, "memory", term_counts, index, len(SAMPLE_DOCS), doc_lengths, avg_length)
+    assert result == [3, 2]
 
 def test_rank_results_empty_matches():
     index = build_index(SAMPLE_DOCS)
     term_counts = build_term_counts(SAMPLE_DOCS)
-    result = rank_results([], "memory", term_counts, index, len(SAMPLE_DOCS))
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
+    result = rank_results([], "memory", term_counts, index, len(SAMPLE_DOCS), doc_lengths, avg_length)
 
     assert result == []
 
@@ -178,6 +196,8 @@ def test_rank_result_matches_beat_frequency():
     index = build_index(SAMPLE_DOCS)
     term_counts = build_term_counts(SAMPLE_DOCS)
     matches = search_query_any("data memory", index)
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
 
-    result = rank_results(matches, "data memory", term_counts, index, len(SAMPLE_DOCS))
+    result = rank_results(matches, "data memory", term_counts, index, len(SAMPLE_DOCS), doc_lengths, avg_length)
     assert result == [2,1,3]

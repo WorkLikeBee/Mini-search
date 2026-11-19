@@ -9,7 +9,7 @@ def compute_idf(word, index, total_docs):
 
     return math.log(n/df)
 
-def rank_results(matches, query, term_counts, index, total_docs):
+def rank_results(matches, query, term_counts, index, total_docs, docs_length, avg_length, k1 = 1.5, b = 0.75):
     tokens = tokenize(query)
     ranking_keys = {}
     idf = {}
@@ -21,7 +21,8 @@ def rank_results(matches, query, term_counts, index, total_docs):
         score = 0
         match_counts = 0
         for word in set(tokens):
-            score += term_counts[doc_id].get(word, 0) * idf[word]
+            tf = term_counts[doc_id].get(word, 0)
+            score += idf[word] * (tf * (k1+1)) / (tf + k1 *(1 - b + b * docs_length[doc_id] / avg_length))
             if word in term_counts[doc_id]:
                 match_counts += 1
 
@@ -42,3 +43,10 @@ def build_term_counts(documents):
                 counts_dic[token] += 1
 
     return id_to_counts
+
+def build_doc_lengths(term_counts):
+    id_to_length = {}
+    for doc_id in term_counts:
+        id_to_length[doc_id] = sum(term_counts[doc_id].values())
+
+    return id_to_length

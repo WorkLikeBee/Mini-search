@@ -5,15 +5,14 @@ from trie import Trie, complete_query
 
 
 def load_document(path):
-    with open(path, "r", encoding="utf-8") as file:
-        return json.load(file)
-
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def main():
-    documents = load_document("./data.json")
+    documents = load_document("data_stackoverflow.json")
     index = build_index(documents)
     term_counts = build_term_counts(documents)
-    id_to_title = {doc["id"]: doc["title"] for doc in documents}
+    id_to_doc = {doc["id"]: (doc["title"], doc.get("link")) for doc in documents}
     total_docs = len(documents)
 
     trie = Trie()
@@ -36,8 +35,8 @@ def main():
             print("Result not found")
             continue
 
-        for doc_id in results:
-            print(f"[{doc_id}] {id_to_title[doc_id]}")
+        for doc_id in results[:10]:
+            print(f"[{doc_id}] {id_to_doc[doc_id][0]}  |  {id_to_doc[doc_id][1]} ")
 
 
 if __name__ == "__main__":

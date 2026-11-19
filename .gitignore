@@ -1,7 +1,7 @@
 .venv/
 *.pyc
 __pycache__/
-
+*.json
 raw_sample.json
 
 .pytest_cache/

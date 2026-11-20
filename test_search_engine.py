@@ -138,13 +138,17 @@ def test_build_doc_lengths():
 
 def test_compute_idf_with_word():
     index = build_index(SAMPLE_DOCS)
-    result = compute_idf("management", index, 3)
-    assert result == math.log(3/1)
+    df = len(index.get("management", []))
+    n = len(SAMPLE_DOCS)
+    result = compute_idf("management", index, n)
+    assert result == math.log((n - df + 0.5) / (df + 0.5) + 1)
 
 def test_compute_idf_no_word():
     index = build_index(SAMPLE_DOCS)
-    result = compute_idf(" ", index, 3)
-    assert result == 0
+    df = len(index.get(" ", []))
+    n = len(SAMPLE_DOCS)
+    result = compute_idf(" ", index, n)
+    assert result == math.log((n - df + 0.5) / (df + 0.5) + 1)
 
 def test_rank_result_by_frequency():
     index = build_index(SAMPLE_DOCS)

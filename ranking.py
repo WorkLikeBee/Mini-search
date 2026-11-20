@@ -4,10 +4,10 @@ from tokenizer import tokenize,searchable_text
 def compute_idf(word, index, total_docs):
     df = len(index.get(word, []))
     n = total_docs
-    if df == 0:
-        return 0
+    # if df == 0:
+    #     return 0
 
-    return math.log(n/df)
+    return math.log((n - df + 0.5) / (df + 0.5) + 1)
 
 def rank_results(matches, query, term_counts, index, total_docs, docs_length, avg_length, k1 = 1.5, b = 0.75):
     tokens = tokenize(query)

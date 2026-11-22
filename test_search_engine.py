@@ -1,4 +1,4 @@
-from tokenizer import tokenize
+from tokenizer import tokenize, stem
 from index import build_index, search_query, intersect, union, search_query_any
 from ranking import build_term_counts, compute_idf, rank_results, build_doc_lengths
 import math
@@ -22,6 +22,25 @@ def test_tokenize_splits_hyphenated_word():
     text = "linked-list"
     result = tokenize(text)
     assert result == ["linked", "list"]
+
+def test_stemming_word():
+    result = stem("uses")
+    assert result == "use"
+
+def test_stem_strips_suffixes():
+    assert stem("sorting") == "sort"
+    assert stem("sorted") == "sort"
+    assert stem("sorts") == "sort"
+
+def test_stem_es_only_after_s_x_z_ch_sh():
+    assert stem("classes") == "class"
+    assert stem("boxes") == "box"
+    assert stem("files") == "file"
+    assert stem("changes") == "change"
+
+def test_stem_leaves_protected_words():
+    for word in ["string", "thing", "class", "this", "status", "is"]:
+        assert stem(word) == word
 
 def test_intersect_find_common_id():
     list_a = [1,3,5]

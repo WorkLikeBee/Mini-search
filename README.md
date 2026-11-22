@@ -11,16 +11,41 @@ I found it interesting that when we ask Google to search for something, it shows
 ```
 Enter query: py*
 Suggestions:  ['py', 'py2', 'pyenv', 'pypi', 'python', 'pythonic', 'pythonicest', 'pythonista', 'pyvenv']
-Enter query: pyvenv
-[430] What is the difference between venv, pyvenv, pyenv, virtualenv, virtualenvwrapper, pipenv, etc.?  |  https://stackoverflow.com/questions/41573587/...
 Enter query: python
-[562] How do I declare custom exceptions in modern Python?  |  https://stackoverflow.com/questions/1319615/...
-[604] How to resolve the Python error 'attempted relative import'  |  https://stackoverflow.com/questions/14132789/...
-[238] Why is "1000000000000000 in range(1000000000000001)" so fast in Python 3?  |  https://stackoverflow.com/questions/30081275/...
-[457] Why is reading lines from stdin much slower in C++ than Python?  |  https://stackoverflow.com/questions/9371238/...
-[133] Convert bytes to a string in Python 3  |  https://stackoverflow.com/questions/606191/...
-...
+[762] What is the Python 3 equivalent of "python -m SimpleHTTPServer"  |  https://stackoverflow.com/questions/7943751/what-is-the-python-3-equivalent-of-python-m-simplehttpserver
+[857] Null object in Python  |  https://stackoverflow.com/questions/3289601/null-object-in-python
+[21] Does Python have a ternary conditional operator?  |  https://stackoverflow.com/questions/394809/does-python-have-a-ternary-conditional-operator
+[709] Replacements for switch statement in Python?  |  https://stackoverflow.com/questions/60208/replacements-for-switch-statement-in-python
+[125] How do I get the current time in Python?  |  https://stackoverflow.com/questions/415511/how-do-i-get-the-current-time-in-python
+[830] How do I move a file in Python?  |  https://stackoverflow.com/questions/8858008/how-do-i-move-a-file-in-python
+[210] How do I concatenate two lists in Python?  |  https://stackoverflow.com/questions/1720421/how-do-i-concatenate-two-lists-in-python
+[166] How can I delete a file or folder in Python?  |  https://stackoverflow.com/questions/6996603/how-can-i-delete-a-file-or-folder-in-python
+[177] How can I access environment variables in Python?  |  https://stackoverflow.com/questions/4906977/how-can-i-access-environment-variables-in-python
+[614] Use a different Python version with virtualenv  |  https://stackoverflow.com/questions/1534210/use-a-different-python-version-with-virtualenv
+Enter query: software*
+Suggestions:  ['software']
+Enter query: software
+[799] Cycles in family tree software  |  https://stackoverflow.com/questions/6163683/cycles-in-family-tree-software
+[481] What is move semantics?  |  https://stackoverflow.com/questions/3106110/what-is-move-semantics
+[524] What is the difference between a process and a thread?  |  https://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread
+[87] How is Docker different from a virtual machine?  |  https://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-virtual-machine
+Enter query: hide in b*
+Suggestions:  No suggestions
+Enter query: git commit r*
+Suggestions:  No suggestions
+Enter query: git commit
+[175] What does cherry-picking a commit with Git mean?  |  https://stackoverflow.com/questions/9339429/what-does-cherry-picking-a-commit-with-git-mean
+[528] How to undo "git commit --amend" done instead of "git commit"  |  https://stackoverflow.com/questions/1459150/how-to-undo-git-commit-amend-done-instead-of-git-commit
+[9] How do I undo 'git add' before commit?  |  https://stackoverflow.com/questions/348170/how-do-i-undo-git-add-before-commit
+[804] Remove a git commit which has not been pushed  |  https://stackoverflow.com/questions/1611215/remove-a-git-commit-which-has-not-been-pushed
+[272] How do I get the hash for the current commit in Git?  |  https://stackoverflow.com/questions/949314/how-do-i-get-the-hash-for-the-current-commit-in-git
+[29] How do I revert a Git repository to a previous commit?  |  https://stackoverflow.com/questions/4114095/how-do-i-revert-a-git-repository-to-a-previous-commit
+[664] How can I generate a Git patch for a specific commit?  |  https://stackoverflow.com/questions/6658313/how-can-i-generate-a-git-patch-for-a-specific-commit
+[186] How do I modify a specific commit?  |  https://stackoverflow.com/questions/1186535/how-do-i-modify-a-specific-commit
+[169] How do I make git use the editor of my choice for editing commit messages?  |  https://stackoverflow.com/questions/2596805/how-do-i-make-git-use-the-editor-of-my-choice-for-editing-commit-messages
+[147] Commit only part of a file's changes in Git  |  https://stackoverflow.com/questions/1085162/commit-only-part-of-a-files-changes-in-git
 Enter query: q
+
 ```
 
 Typing `*` at the end of a query asks for suggestions, drawn from the real vocabulary of the questions. A normal query returns the 10 most relevant questions, each with a link to the original on Stack Overflow.

@@ -1,5 +1,5 @@
 from trie import Trie, complete_query
-from index import build_index
+from index import build_index, build_vocab
 
 def test_insert_mark_end_of_word():
     t = Trie()
@@ -73,8 +73,9 @@ COMPLETE_DOCS = [
 
 def make_index_and_trie():
     index = build_index(COMPLETE_DOCS)
+    vocab = build_vocab(COMPLETE_DOCS)
     trie = Trie()
-    for word in index:
+    for word in vocab:
         trie.insert(word)
     return index, trie
 

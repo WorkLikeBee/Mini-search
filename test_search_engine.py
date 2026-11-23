@@ -1,4 +1,4 @@
-from tokenizer import tokenize, stem
+from tokenizer import tokenize, use_stemming
 from index import build_index, search_query, intersect, union, search_query_any
 from ranking import build_term_counts, compute_idf, rank_results, build_doc_lengths
 import math
@@ -21,26 +21,26 @@ def test_tokenize_punctuation_only():
 def test_tokenize_splits_hyphenated_word():
     text = "linked-list"
     result = tokenize(text)
-    assert result == ["linked", "list"]
+    assert result == ["link", "list"]
 
 def test_stemming_word():
-    result = stem("uses")
+    result = use_stemming("uses")
     assert result == "use"
 
 def test_stem_strips_suffixes():
-    assert stem("sorting") == "sort"
-    assert stem("sorted") == "sort"
-    assert stem("sorts") == "sort"
+    assert use_stemming("sorting") == "sort"
+    assert use_stemming("sorted") == "sort"
+    assert use_stemming("sorts") == "sort"
 
 def test_stem_es_only_after_s_x_z_ch_sh():
-    assert stem("classes") == "class"
-    assert stem("boxes") == "box"
-    assert stem("files") == "file"
-    assert stem("changes") == "change"
+    assert use_stemming("classes") == "class"
+    assert use_stemming("boxes") == "box"
+    assert use_stemming("files") == "file"
+    assert use_stemming("changes") == "change"
 
 def test_stem_leaves_protected_words():
     for word in ["string", "thing", "class", "this", "status", "is"]:
-        assert stem(word) == word
+        assert use_stemming(word) == word
 
 def test_intersect_find_common_id():
     list_a = [1,3,5]
@@ -137,10 +137,18 @@ def test_search_any_not_found_query():
 
     assert result == []
 
+def test_search_matches_different_word_forms():
+    docs = [
+        {"id": 1, "title": "A", "text": "the list is sorted"},
+        {"id": 2, "title": "B", "text": "nothing here"},
+    ]
+    index = build_index(docs)
+    assert search_query("sorting", index) == [1]
+
 def test_build_term_count():
     result = build_term_counts(SAMPLE_DOCS)
     assert result == {
-    1: {"doc": 1, "one": 1,"data": 2, "structures": 1, "and": 1, "algorithms": 1},
+    1: {"doc": 1, "one": 1,"data": 2, "structure": 1, "and": 1, "algorithm": 1},
     2: {"doc": 1, "two": 1,"data": 1, "and": 1, "memory": 1},
     3: {"doc": 1, "three": 1, "memory": 1, "management": 1},
 }

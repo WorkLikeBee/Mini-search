@@ -2,15 +2,17 @@ import string
 
 VOWELS = "aeiou"
 
-def tokenize(text):
+def tokenize(text, stem=True):
     #Reduce punctuation
     for char in string.punctuation:
         if char in text:
             text = text.replace(char, " ")
 
-    return text.lower().split()
+    results = [use_stemming(word) if stem else word for word in text.lower().split()]
 
-def stem(word):
+    return results
+
+def use_stemming(word):
     if len(word) <= 3:
         return word
 

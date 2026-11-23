@@ -1,5 +1,5 @@
 import json
-from index import build_index, search_query_any
+from index import build_index, search_query_any, build_vocab
 from ranking import build_term_counts, rank_results, build_doc_lengths
 from trie import Trie, complete_query
 
@@ -16,6 +16,7 @@ def main():
         return
 
     index = build_index(documents)
+    vocabs = build_vocab(documents)
     term_counts = build_term_counts(documents)
     docs_length = build_doc_lengths(term_counts)
     average_docs_length = sum(docs_length.values()) / len(docs_length)
@@ -23,7 +24,7 @@ def main():
     total_docs = len(documents)
 
     trie = Trie()
-    for token in index:
+    for token in vocabs:
         trie.insert(token)
 
     while True:

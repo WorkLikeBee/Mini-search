@@ -60,6 +60,7 @@ A full-text search engine builds a word-to-ID map from the dataset. It then uses
 - Prefix autocomplete, including the last word of a multi-word query
 - Searches both question titles and text
 - Case-insensitive search and punctuation handling
+- Simple suffix stemming, so `sort`, `sorted`, and `sorting` match each other
 
 ## How it works
 
@@ -72,16 +73,16 @@ Stack Exchange API → page through results → skip duplicates and closed quest
 **Searching** (`main.py`):
 
 ```
-query → tokenize → inverted index lookup → union → rank (matched words, then BM25) → top 10 results
+query → tokenize + stem → inverted index lookup → union → rank (matched words, then BM25) → top 10 results
 ```
 
-1. **Tokenize:** turn the query into tokens (a list of words)
+1. **Tokenize:** lowercase the query, split it into words, and reduce each word to its stem (`sorting` → `sort`)
 2. **Inverted index:** build a word-to-ID map covering each document's title and text
 3. **Combine:** find every document that contains at least one query word
 4. **Rank:** sort by how many distinct query words each document contains, then by BM25 score, and show the top 10
 
 **Autocomplete:** the trie is a data structure built from nodes. Each node has a map of its children and a boolean that marks whether the path to it spells a complete word. A node can be the end of a word and still have children: "data" is a complete word, but it continues into "database" and "dataset." The trie has two main functions: insert a word, and autocomplete a prefix to give suggestions.
-The autocomplete function walks down the path that matches the prefix, then explores every path below it in alphabetical order, collects each complete word it finds (up to a limit), and returns the suggestions in a list. For a multi-word query, only the last word is completed, and a suggestion is kept only if all of its words appear together in at least one document.
+The autocomplete function walks down the path that matches the prefix, then explores every path below it in alphabetical order, collects each complete word it finds (up to a limit), and returns the suggestions in a list. For a multi-word query, only the last word is completed, and a suggestion is kept only if all of its words appear together in at least one document. The trie holds real words, not stems. When a suggestion is searched, it is stemmed like any other query.
 
 ## Design decisions
 
@@ -105,7 +106,11 @@ The autocomplete function walks down the path that matches the prefix, then expl
 
 **Punctuation becomes a space.** Replacing punctuation with a space splits `linked-lists` into `linked` and `lists`, so either word finds the document. The tradeoff is that `don't` becomes `don` and `t`. Hyphenated terms are more common in technical text, so splitting was the better choice here.
 
-**Trie for autocomplete.** Words that share a prefix share a path in the trie. Finding suggestions takes O(P + K) time, where P is the prefix length and K is the number of nodes below it, instead of checking every word in the vocabulary. The trie is built from the inverted index's keys, so suggestions always match words that can actually be searched.
+**Simple suffix stemmer.** Words are reduced to a common stem (`sorting`, `sorted`, `sorts` → `sort`) so different forms match. The rules strip `-ing`, `-ed`, `-es`, and `-s`, but only when the remainder has at least 3 letters and a vowel, which protects words like `string`. A plain `-s` is also left alone after `ss`, `us`, or `is`, which protects `this`, `class`, and `status`. `-es` is only stripped after `s`, `x`, `z`, `ch`, or `sh`, so `files` becomes `file`, not `fil`. It is simpler than the Porter stemmer: `creating` and `create` don't match yet.
+
+**Search uses stems, autocomplete uses real words.** The index and ranking use stemmed tokens, while the trie is built from the original words, so suggestions are always real words. Searching a suggestion stems it automatically.
+
+**Trie for autocomplete.** Words that share a prefix share a path in the trie. Finding suggestions takes O(P + K) time, where P is the prefix length and K is the number of nodes below it, instead of checking every word in the vocabulary. The trie is built from the original (unstemmed) vocabulary, so suggestions are always real words.
 
 **Autocomplete limit with early stopping.** Children are visited in sorted order, so the depth-first search finds words alphabetically. Once the limit is reached, the search stops instead of walking the rest of the trie, which keeps short prefixes fast on a large vocabulary.
 
@@ -150,8 +155,8 @@ python -m pytest -v
 ```
 main.py                 # Loads data, builds the index, ranking data, and trie; runs the search loop
 fetch_data.py           # Fetches questions from the Stack Exchange API, cleans them, and saves them as JSON
-tokenizer.py            # Lowercases text, removes punctuation, splits into words; combines title and text
-index.py                # Builds the inverted index; AND and OR search with two-pointer intersection and union
+tokenizer.py            # Lowercases text, removes punctuation, splits into words, stems them; combines title and text
+index.py                # Builds the inverted index and the unstemmed vocabulary; AND and OR search with two-pointer intersection and union
 ranking.py              # Term counts, document lengths, IDF, and ranking by matched words then BM25
 trie.py                 # Trie with insert, limited prefix autocomplete, and multi-word query completion
 trie_node.py            # A single trie node (children and end-of-word marker)
@@ -171,7 +176,7 @@ data_stackoverflow.json # Generated by fetch_data.py (not committed)
 Problems found by testing on real data:
 
 - [x] Length normalization (BM25), so long questions don't rank higher just for mentioning more words
-- [ ] Stemming, so `sort`, `sorted`, and `sorting` match each other
+- [x] Stemming, so `sort`, `sorted`, and `sorting` match each other
 - [ ] Stop words or IDF-weighted match counts, so common words like "in" don't count as much as rare ones
 - [ ] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off
 - [ ] Spelling correction with edit distance, so typos like `ciber*` still find suggestions

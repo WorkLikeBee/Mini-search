@@ -13,6 +13,15 @@ def build_index(documents):
 
     return index
 
+def build_vocab(documents):
+    vocab = set()
+    for document in documents:
+        text = searchable_text(document)
+        for word in tokenize(text, False):
+            vocab.add(word)
+
+    return vocab
+
 def search_query_any(query, index):
     tokens = tokenize(query)
     if len(tokens) == 0:

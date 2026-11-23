@@ -19,14 +19,14 @@ def rank_results(matches, query, term_counts, index, total_docs, docs_length, av
 
     for doc_id in matches:
         score = 0
-        match_counts = 0
+        matched_weight = 0
         for word in set(tokens):
             tf = term_counts[doc_id].get(word, 0)
             score += idf[word] * (tf * (k1+1)) / (tf + k1 *(1 - b + b * docs_length[doc_id] / avg_length))
             if word in term_counts[doc_id]:
-                match_counts += 1
+                matched_weight += idf[word]
 
-        ranking_keys[doc_id] = (match_counts, score)
+        ranking_keys[doc_id] = (matched_weight, score)
 
     return sorted(matches, key=lambda doc_id: ranking_keys[doc_id], reverse=True)
 

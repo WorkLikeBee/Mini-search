@@ -39,13 +39,12 @@ Enter query: git commit
 [9] How do I undo 'git add' before commit?  |  https://stackoverflow.com/questions/348170/how-do-i-undo-git-add-before-commit
 [804] Remove a git commit which has not been pushed  |  https://stackoverflow.com/questions/1611215/remove-a-git-commit-which-has-not-been-pushed
 [272] How do I get the hash for the current commit in Git?  |  https://stackoverflow.com/questions/949314/how-do-i-get-the-hash-for-the-current-commit-in-git
+[2] How do I undo the most recent local commits in Git?  |  https://stackoverflow.com/questions/927358/how-do-i-undo-the-most-recent-local-commits-in-git
+[566] How can I merge multiple commits onto another branch as a single squashed commit?  |  https://stackoverflow.com/questions/5308816/how-can-i-merge-multiple-commits-onto-another-branch-as-a-single-squashed-commit
 [29] How do I revert a Git repository to a previous commit?  |  https://stackoverflow.com/questions/4114095/how-do-i-revert-a-git-repository-to-a-previous-commit
 [664] How can I generate a Git patch for a specific commit?  |  https://stackoverflow.com/questions/6658313/how-can-i-generate-a-git-patch-for-a-specific-commit
-[186] How do I modify a specific commit?  |  https://stackoverflow.com/questions/1186535/how-do-i-modify-a-specific-commit
 [169] How do I make git use the editor of my choice for editing commit messages?  |  https://stackoverflow.com/questions/2596805/how-do-i-make-git-use-the-editor-of-my-choice-for-editing-commit-messages
-[147] Commit only part of a file's changes in Git  |  https://stackoverflow.com/questions/1085162/commit-only-part-of-a-files-changes-in-git
 Enter query: q
-
 ```
 
 Typing `*` at the end of a query asks for suggestions, drawn from the real vocabulary of the questions. A normal query returns the 10 most relevant questions, each with a link to the original on Stack Overflow.
@@ -55,7 +54,7 @@ A full-text search engine builds a word-to-ID map from the dataset. It then uses
 ## Features
 
 - Searches real Stack Overflow questions, fetched from the Stack Exchange API
-- Multi-word search: documents matching any query word are returned, with full matches ranked first
+- Multi-word search: documents matching any query word are returned, with documents matching the most important words ranked first
 - Ranked results using BM25, showing the top 10 with links
 - Prefix autocomplete, including the last word of a multi-word query
 - Searches both question titles and text
@@ -73,13 +72,13 @@ Stack Exchange API → page through results → skip duplicates and closed quest
 **Searching** (`main.py`):
 
 ```
-query → tokenize + stem → inverted index lookup → union → rank (matched words, then BM25) → top 10 results
+query → tokenize + stem → inverted index lookup → union → rank (matched-word importance, then BM25) → top 10 results
 ```
 
 1. **Tokenize:** lowercase the query, split it into words, and reduce each word to its stem (`sorting` → `sort`)
 2. **Inverted index:** build a word-to-ID map covering each document's title and text
 3. **Combine:** find every document that contains at least one query word
-4. **Rank:** sort by how many distinct query words each document contains, then by BM25 score, and show the top 10
+4. **Rank:** sort by the combined importance (IDF) of the query words each document contains, then by BM25 score, and show the top 10
 
 **Autocomplete:** the trie is a data structure built from nodes. Each node has a map of its children and a boolean that marks whether the path to it spells a complete word. A node can be the end of a word and still have children: "data" is a complete word, but it continues into "database" and "dataset." The trie has two main functions: insert a word, and autocomplete a prefix to give suggestions.
 The autocomplete function walks down the path that matches the prefix, then explores every path below it in alphabetical order, collects each complete word it finds (up to a limit), and returns the suggestions in a list. For a multi-word query, only the last word is completed, and a suggestion is kept only if all of its words appear together in at least one document. The trie holds real words, not stems. When a suggestion is searched, it is stemmed like any other query.
@@ -92,9 +91,11 @@ The autocomplete function walks down the path that matches the prefix, then expl
 
 **Two-pointer intersection and union.** Each word's list of document IDs is already sorted, because documents are indexed in ID order. Two pointers walk both lists at once, always advancing the pointer at the smaller ID. Intersection keeps only IDs found in both lists; union (the merge step from merge sort) keeps every ID once. Both run in O(n + m) time, where n and m are the lengths of the two lists, and need no extra data structures like sets.
 
-**Ranked by matched words, then BM25.** Search returns documents containing any query word. Results are sorted by a two-part key: the number of distinct query words a document contains, then its BM25 score. A document matching the whole query always beats one that repeats a single word many times, and BM25 breaks ties.
+**Ranked by matched-word importance, then BM25.** Search returns documents containing any query word. Results are sorted by a two-part key: the total IDF of the distinct query words a document contains, then its BM25 score. Rare words count for more than common ones, so for `software developer in`, a question matching only "software" (in 4 of ~900 questions) outranks one matching "developer" + "in" ("in" appears in 611). Since every IDF is positive, a document matching all query words still always ranks first.
 
-**BM25 instead of plain TF-IDF.** Plain TF-IDF rewards a word every time it repeats, so long questions that mention a word often outrank short, focused ones. BM25 fixes this in two ways: term frequency saturates (the tenth repeat adds far less than the second), and each document's score is normalized by its length relative to the average (`k1 = 1.5`, `b = 0.75`). Document lengths are computed once from the term counts, so ranking needs no extra pass over the text. The matched-words count stays the first sort key, so BM25 only orders documents that match the same number of query words.
+**IDF weighting instead of a stop word list.** A hand-picked stop word list would remove words like `in`, `is`, and `not`, which are meaningful in programming questions. Weighting each matched word by its IDF reduces the influence of common words automatically, adapts to the dataset, and needs no list to maintain.
+
+**BM25 instead of plain TF-IDF.** Plain TF-IDF rewards a word every time it repeats, so long questions that mention a word often outrank short, focused ones. BM25 fixes this in two ways: term frequency saturates (the tenth repeat adds far less than the second), and each document's score is normalized by its length relative to the average (`k1 = 1.5`, `b = 0.75`). Document lengths are computed once from the term counts, so ranking needs no extra pass over the text. The matched-word importance stays the first sort key, so BM25 orders documents whose matched words carry the same total weight.
 
 **Rank first, then trim.** All matching documents are ranked before the top 10 are taken. An earlier version trimmed to 10 before ranking, which kept the 10 lowest IDs instead of the 10 best matches.
 
@@ -157,7 +158,7 @@ main.py                 # Loads data, builds the index, ranking data, and trie; 
 fetch_data.py           # Fetches questions from the Stack Exchange API, cleans them, and saves them as JSON
 tokenizer.py            # Lowercases text, removes punctuation, splits into words, stems them; combines title and text
 index.py                # Builds the inverted index and the unstemmed vocabulary; AND and OR search with two-pointer intersection and union
-ranking.py              # Term counts, document lengths, IDF, and ranking by matched words then BM25
+ranking.py              # Term counts, document lengths, IDF, and ranking by matched-word importance then BM25
 trie.py                 # Trie with insert, limited prefix autocomplete, and multi-word query completion
 trie_node.py            # A single trie node (children and end-of-word marker)
 test_search_engine.py   # Tests for tokenizer, search, and ranking
@@ -177,7 +178,7 @@ Problems found by testing on real data:
 
 - [x] Length normalization (BM25), so long questions don't rank higher just for mentioning more words
 - [x] Stemming, so `sort`, `sorted`, and `sorting` match each other
-- [ ] Stop words or IDF-weighted match counts, so common words like "in" don't count as much as rare ones
+- [x] IDF-weighted match counts, so common words like "in" don't count as much as rare ones
 - [ ] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off
 - [ ] Spelling correction with edit distance, so typos like `ciber*` still find suggestions
 

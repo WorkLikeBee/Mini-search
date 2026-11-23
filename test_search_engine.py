@@ -232,3 +232,17 @@ def test_rank_result_matches_beat_frequency():
 
     result = rank_results(matches, "data memory", term_counts, index, len(SAMPLE_DOCS), doc_lengths, avg_length)
     assert result == [2,1,3]
+
+def test_rank_results_rare_word_beats_common_words():
+    docs = [{"id": 1, "title": "A", "text": "rare"}]
+    for doc_id in range(2, 7):
+        docs.append({"id": doc_id, "title": "B", "text": "common other"})
+
+    index = build_index(docs)
+    term_counts = build_term_counts(docs)
+    matches = search_query_any("rare common other", index)
+    doc_lengths = build_doc_lengths(term_counts)
+    avg_length = sum(doc_lengths.values()) / len(doc_lengths)
+
+    result = rank_results(matches, "rare common other", term_counts, index, len(docs), doc_lengths, avg_length)
+    assert result[0] == 1

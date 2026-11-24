@@ -104,14 +104,6 @@ def test_complete_query_finds_valid_word_beyond_limit():
         {"id": 1, "title": "A", "text": "software inzz"},
         {"id": 2, "title": "B", "text": "ina inb inc ind"},
     ]
-    index, trie = make_index_and_trie()
-    assert complete_query("software in", trie, index) == []
-
-def test_complete_query_finds_valid_word_beyond_limit():
-    docs = [
-        {"id": 1, "title": "A", "text": "software inzz"},
-        {"id": 2, "title": "B", "text": "ina inb inc ind"},
-    ]
     index = build_index(docs)
     trie = Trie()
     for word in build_vocab(docs):

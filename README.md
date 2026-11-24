@@ -44,12 +44,16 @@ Enter query: git commit
 [29] How do I revert a Git repository to a previous commit?  |  https://stackoverflow.com/questions/4114095/how-do-i-revert-a-git-repository-to-a-previous-commit
 [664] How can I generate a Git patch for a specific commit?  |  https://stackoverflow.com/questions/6658313/how-can-i-generate-a-git-patch-for-a-specific-commit
 [169] How do I make git use the editor of my choice for editing commit messages?  |  https://stackoverflow.com/questions/2596805/how-do-i-make-git-use-the-editor-of-my-choice-for-editing-commit-messages
+Enter query: pyhton*
+Did you mean:  ['python']
+Enter query: javascript arrray*
+Did you mean:  ['javascript array', 'javascript arrays']
 Enter query: q
 ```
 
 Typing `*` at the end of a query asks for suggestions, drawn from the real vocabulary of the questions. A normal query returns the 10 most relevant questions, each with a link to the original on Stack Overflow.
 
-A full-text search engine builds a word-to-ID map from the dataset. It then uses the user's input to find the matching document(s) through the index, and ranks the results using the BM25 method. If the user is unsure of the spelling, they can type `*` at the end, and the engine will suggest words that start with what they typed.
+A full-text search engine builds a word-to-ID map from the dataset. It then uses the user's input to find the matching document(s) through the index, and ranks the results using the BM25 method. If the user is unsure of the spelling, they can type `*` at the end, and the engine will suggest words that start with what they typed. If nothing starts with it, the engine falls back to spelling correction and suggests the closest real words.
 
 ## Features
 
@@ -57,6 +61,7 @@ A full-text search engine builds a word-to-ID map from the dataset. It then uses
 - Multi-word search: documents matching any query word are returned, with documents matching the most important words ranked first
 - Ranked results using BM25, showing the top 10 with links
 - Prefix autocomplete, including the last word of a multi-word query
+- Spelling correction with edit distance, so `pyhton*` suggests `python`
 - Searches both question titles and text
 - Case-insensitive search and punctuation handling
 - Simple suffix stemming, so `sort`, `sorted`, and `sorting` match each other
@@ -82,6 +87,8 @@ query → tokenize + stem → inverted index lookup → union → rank (matched-
 
 **Autocomplete:** the trie is a data structure built from nodes. Each node has a map of its children and a boolean that marks whether the path to it spells a complete word. A node can be the end of a word and still have children: "data" is a complete word, but it continues into "database" and "dataset." The trie has two main functions: insert a word, and autocomplete a prefix to give suggestions.
 The autocomplete function walks down the path that matches the prefix, then explores every path below it in alphabetical order, collects each complete word it finds (up to a limit), and returns the suggestions in a list. For a multi-word query, only the last word is completed, and a suggestion is kept only if all of its words appear together in at least one document. The trie holds real words, not stems. When a suggestion is searched, it is stemmed like any other query.
+
+**Spelling correction:** when autocomplete finds nothing, the last word is compared against every word in the vocabulary using Levenshtein edit distance: the fewest single-letter inserts, deletes, and substitutions that turn one word into the other. It is computed with dynamic programming: a table where each cell holds the distance between two prefixes, built from its three neighbors (diagonal, above, and left). Close words are sorted by distance, then alphabetically, and kept only if the full phrase still finds a document.
 
 ## Design decisions
 
@@ -118,6 +125,12 @@ The autocomplete function walks down the path that matches the prefix, then expl
 **Validity checked during the search, not after.** `complete_query` passes the trie a small predicate function that checks whether a candidate phrase appears in at least one document. The depth-first search only counts words that pass, so it stops after finding 10 *valid* suggestions instead of 10 words that might all be filtered out later. The trie itself knows nothing about searching; it just calls the function it's given.
 
 **Suggestions are stricter than search.** Search uses OR so it always tries to return something useful, but multi-word suggestions use AND: a suggestion is only shown if all of its words appear together in at least one document, so it never leads to a phrase that finds nothing.
+
+**Edit limit scales with word length.** Short words allow 1 edit and longer words allow 2. With 2 edits, a 3-letter typo like `gti` matched 47 words (`api`, `btw`, `etc`...); with 1 edit it matches 2. Longer words need the extra edit, because a common typo like `pyhton` (two swapped letters) is 2 edits from `python`.
+
+**Spelling correction is a fallback, in its own function.** `correct_query` only runs when `complete_query` finds nothing, so normal prefix suggestions stay fast. Keeping them separate also lets `main.py` show corrections as "Did you mean" instead of mixing them in with completions.
+
+**Checking every word instead of a fancier structure.** Comparing a word against all ~4,800 vocabulary words takes about 0.03 seconds, so a linear scan is fast enough at this size. A larger vocabulary would call for searching the trie with the edit-distance table, pruning branches that are already too far away.
 
 ### Data pipeline
 
@@ -165,6 +178,8 @@ trie.py                 # Trie with insert, limited prefix autocomplete, and mul
 trie_node.py            # A single trie node (children and end-of-word marker)
 test_search_engine.py   # Tests for tokenizer, search, and ranking
 test_trie.py            # Tests for the trie and autocomplete
+spelling.py             # Levenshtein edit distance and spelling correction for the last query word
+test_spelling.py        # Tests for edit distance and spelling correction
 data_stackoverflow.json # Generated by fetch_data.py (not committed)
 ```
 
@@ -182,7 +197,9 @@ Problems found by testing on real data:
 - [x] Stemming, so `sort`, `sorted`, and `sorting` match each other
 - [x] IDF-weighted match counts, so common words like "in" don't count as much as rare ones
 - [x] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off
-- [ ] Spelling correction with edit distance, so typos like `ciber*` still find suggestions
+- [x] Spelling correction with edit distance, so typos like `pyhton*` still find suggestions
+- [ ] Count swapped letters as one edit (Damerau-Levenshtein), so `pyhton` is 1 edit from `python`
+- [ ] Break spelling ties by how common a word is, so `gitt` suggests `git` before `gis`
 
 Bigger next steps:
 

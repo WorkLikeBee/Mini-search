@@ -2,6 +2,7 @@ import json
 from index import build_index, search_query_any, build_vocab
 from ranking import build_term_counts, rank_results, build_doc_lengths
 from trie import Trie, complete_query
+from spelling import correct_query
 
 
 def load_document(path):
@@ -34,7 +35,11 @@ def main():
 
         if query.endswith("*"):
             suggestions = complete_query(query[:-1], trie, index)
-            print("Suggestions: ", suggestions if suggestions else "No suggestions")
+            if suggestions:
+                print("Suggestions: ", suggestions)
+            else:
+                corrections = correct_query(query[:-1], vocabs, index)
+                print("Did you mean: ", corrections if corrections else "No suggestions")
             continue
 
         matches = search_query_any(query, index)

@@ -98,3 +98,30 @@ def test_complete_query_no_match():
 def test_complete_query_capitals_and_punctuation():
     index, trie = make_index_and_trie()
     assert complete_query("Software, En", trie, index) == complete_query("software en", trie, index)
+
+def test_complete_query_finds_valid_word_beyond_limit():
+    docs = [
+        {"id": 1, "title": "A", "text": "software inzz"},
+        {"id": 2, "title": "B", "text": "ina inb inc ind"},
+    ]
+    index, trie = make_index_and_trie()
+    assert complete_query("software in", trie, index) == []
+
+def test_complete_query_finds_valid_word_beyond_limit():
+    docs = [
+        {"id": 1, "title": "A", "text": "software inzz"},
+        {"id": 2, "title": "B", "text": "ina inb inc ind"},
+    ]
+    index = build_index(docs)
+    trie = Trie()
+    for word in build_vocab(docs):
+        trie.insert(word)
+    assert complete_query("software in", trie, index, limit=3) == ["software inzz"]
+
+def test_complete_query_does_not_stem_prefix():
+    docs = [{"id": 1, "title": "A", "text": "classes classic"}]
+    index = build_index(docs)
+    trie = Trie()
+    for word in build_vocab(docs):
+        trie.insert(word)
+    assert complete_query("classes", trie, index) == ["classes"]

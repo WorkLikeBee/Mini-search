@@ -115,6 +115,8 @@ The autocomplete function walks down the path that matches the prefix, then expl
 
 **Autocomplete limit with early stopping.** Children are visited in sorted order, so the depth-first search finds words alphabetically. Once the limit is reached, the search stops instead of walking the rest of the trie, which keeps short prefixes fast on a large vocabulary.
 
+**Validity checked during the search, not after.** `complete_query` passes the trie a small predicate function that checks whether a candidate phrase appears in at least one document. The depth-first search only counts words that pass, so it stops after finding 10 *valid* suggestions instead of 10 words that might all be filtered out later. The trie itself knows nothing about searching; it just calls the function it's given.
+
 **Suggestions are stricter than search.** Search uses OR so it always tries to return something useful, but multi-word suggestions use AND: a suggestion is only shown if all of its words appear together in at least one document, so it never leads to a phrase that finds nothing.
 
 ### Data pipeline
@@ -179,7 +181,7 @@ Problems found by testing on real data:
 - [x] Length normalization (BM25), so long questions don't rank higher just for mentioning more words
 - [x] Stemming, so `sort`, `sorted`, and `sorting` match each other
 - [x] IDF-weighted match counts, so common words like "in" don't count as much as rare ones
-- [ ] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off
+- [x] Filter autocomplete candidates before applying the limit, so valid multi-word suggestions aren't cut off
 - [ ] Spelling correction with edit distance, so typos like `ciber*` still find suggestions
 
 Bigger next steps:
